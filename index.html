@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dante — Synthwave Portal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+  <style>
+    /* ── Reset & Base ─────────────────────────────── */
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      
+      --neon-pink: #ff2d95;
+      --neon-cyan: #00f0ff;
+      --neon-magenta: #ff00ff;
+      --neon-yellow: #ffe44d;
+      --bg-dark: #0a0015;
+      --bg-purple: #1a0030;
+      --card-bg: rgba(20, 0, 50, 0.7);
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Courier New', Courier, monospace;
+      background: var(--bg-dark);
+      color: #e0d0ff;
+      min-height: 100vh;
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+
+    /* ── Scanlines Overlay ────────────────────────── */
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0, 0, 0, 0.08) 2px,
+        rgba(0, 0, 0, 0.08) 4px
+      );
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* ── Stars Background ─────────────────────────── */
+    #stars-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* ── Hero Section ─────────────────────────────── */
+    .hero {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      text-align: center;
+      z-index: 1;
+      padding: 2rem;
+    }
+
+    /* Retro Sun */
+    .sun {
+      position: absolute;
+      top: 12%;
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      background: linear-gradient(
+        180deg,
+        var(--neon-yellow) 0%,
+        #ff8c00 30%,
+        var(--neon-pink) 60%,
+        var(--neon-magenta) 100%
+      );
+      filter: blur(2px);
+      z-index: -1;
+      /* Horizontal stripe cutouts */
+      mask-image: repeating-linear-gradient(
+        0deg,
+        #000 0px,
+        #000 12px,
+        transparent 12px,
+        transparent 16px
+      );
+      -webkit-mask-image: repeating-linear-gradient(
+        0deg,
+        #000 0px,
+        #000 12px,
+        transparent 12px,
+        transparent 16px
+      );
+      animation: sun-pulse 4s ease-in-out infinite alternate;
+    }
+
+    @keyframes sun-pulse {
+      0%   { transform: scale(1);   opacity: 0.9; }
+      100% { transform: scale(1.05); opacity: 1; }
+    }
+
+    .hero h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 900;
+      font-size: clamp(2.5rem, 8vw, 5rem);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #fff;
+      text-shadow:
+        0 0 10px var(--neon-pink),
+        0 0 20px var(--neon-pink),
+        0 0 40px var(--neon-magenta),
+        0 0 80px var(--neon-magenta);
+      margin-bottom: 0.3em;
+      animation: flicker 3s infinite alternate;
+    }
+
+    @keyframes flicker {
+      0%, 93%, 95%, 97%, 100% { opacity: 1; }
+      94% { opacity: 0.85; }
+      96% { opacity: 0.9; }
+    }
+
+    .hero .tagline {
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 400;
+      font-size: clamp(0.9rem, 2.5vw, 1.3rem);
+      color: var(--neon-cyan);
+      text-shadow:
+        0 0 8px var(--neon-cyan),
+        0 0 20px rgba(0, 240, 255, 0.4);
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      margin-bottom: 2rem;
+    }
+
+    /* ── Grid Floor ───────────────────────────────── */
+    .grid-container {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 45%;
+      overflow: hidden;
+      perspective: 400px;
+      z-index: -1;
+    }
+
+    .grid-floor {
+      position: absolute;
+      bottom: 0;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background-image:
+        linear-gradient(var(--neon-magenta) 1px, transparent 1px),
+        linear-gradient(90deg, var(--neon-magenta) 1px, transparent 1px);
+      background-size: 60px 60px;
+      transform: rotateX(65deg);
+      transform-origin: bottom center;
+      animation: grid-scroll 2s linear infinite;
+      opacity: 0.35;
+    }
+
+    @keyframes grid-scroll {
+      0%   { background-position: 0 0; }
+      100% { background-position: 0 60px; }
+    }
+
+    /* Horizon glow */
+    .grid-container::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: 0;
+      width: 100%;
+      height: 80px;
+      background: linear-gradient(
+        180deg,
+        transparent 0%,
+        var(--neon-pink) 50%,
+        transparent 100%
+      );
+      opacity: 0.4;
+      filter: blur(10px);
+      z-index: 1;
+    }
+
+    /* ── Content Sections ─────────────────────────── */
+    .content {
+      position: relative;
+      z-index: 1;
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 0 2rem 4rem;
+    }
+
+    /* ── About Card ───────────────────────────────── */
+    .about-card {
+      background: var(--card-bg);
+      border: 1px solid rgba(255, 0, 255, 0.25);
+      border-radius: 8px;
+      padding: 2rem 2.5rem;
+      margin-bottom: 3rem;
+      backdrop-filter: blur(8px);
+      box-shadow:
+        0 0 15px rgba(255, 0, 255, 0.1),
+        inset 0 0 30px rgba(0, 0, 0, 0.3);
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    .about-card:hover {
+      border-color: rgba(0, 240, 255, 0.4);
+      box-shadow:
+        0 0 25px rgba(0, 240, 255, 0.15),
+        inset 0 0 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .about-card h2 {
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 700;
+      font-size: 1.3rem;
+      color: var(--neon-cyan);
+      text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+      margin-bottom: 1rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
+    .about-card p {
+      font-size: 1rem;
+      line-height: 1.8;
+      color: #c8b8e8;
+    }
+
+    /* ── Links Section ────────────────────────────── */
+    .links-section h2 {
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 700;
+      font-size: 1.3rem;
+      color: var(--neon-pink);
+      text-shadow: 0 0 10px rgba(255, 45, 149, 0.5);
+      margin-bottom: 1.5rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      text-align: center;
+    }
+
+    .links-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+
+    .link-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      padding: 1rem 1.5rem;
+      background: rgba(20, 0, 50, 0.6);
+      border: 1px solid rgba(255, 45, 149, 0.3);
+      border-radius: 6px;
+      color: #fff;
+      text-decoration: none;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .link-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 45, 149, 0.15),
+        transparent
+      );
+      transition: left 0.5s ease;
+    }
+
+    .link-btn:hover::before {
+      left: 100%;
+    }
+
+    .link-btn:hover {
+      border-color: var(--neon-pink);
+      box-shadow:
+        0 0 15px rgba(255, 45, 149, 0.3),
+        0 0 30px rgba(255, 45, 149, 0.1);
+      transform: translateY(-2px);
+      color: var(--neon-pink);
+      text-shadow: 0 0 8px rgba(255, 45, 149, 0.6);
+    }
+
+    .link-btn .icon {
+      font-size: 1.2rem;
+    }
+
+    /* Alternate color for every other link */
+    .link-btn:nth-child(even) {
+      border-color: rgba(0, 240, 255, 0.3);
+    }
+
+    .link-btn:nth-child(even):hover {
+      border-color: var(--neon-cyan);
+      box-shadow:
+        0 0 15px rgba(0, 240, 255, 0.3),
+        0 0 30px rgba(0, 240, 255, 0.1);
+      color: var(--neon-cyan);
+      text-shadow: 0 0 8px rgba(0, 240, 255, 0.6);
+    }
+
+    /* ── Footer ───────────────────────────────────── */
+    footer {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 2rem;
+      font-size: 0.75rem;
+      color: rgba(200, 184, 232, 0.4);
+      letter-spacing: 0.1em;
+    }
+
+    footer span {
+      color: var(--neon-pink);
+      text-shadow: 0 0 6px rgba(255, 45, 149, 0.4);
+    }
+
+    /* ── Responsive ───────────────────────────────── */
+    @media (max-width: 600px) {
+      .sun {
+        width: 200px;
+        height: 200px;
+        top: 15%;
+      }
+
+      .about-card {
+        padding: 1.5rem;
+      }
+
+      .links-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero .tagline {
+        letter-spacing: 0.15em;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="stars-canvas"></canvas>
+
+  <!-- ── Hero ──────────────────────────────────── -->
+  <section class="hero">
+    <div class="sun"></div>
+    <h1>Dante</h1>
+    <p class="tagline">Developer &bull; Creator &bull; Explorer</p>
+
+    <div class="grid-container">
+      <div class="grid-floor"></div>
+    </div>
+  </section>
+
+  <!-- ── Content ───────────────────────────────── -->
+  <main class="content">
+
+    <!-- About -->
+    <div class="about-card">
+      <h2>// About</h2>
+      <p>
+        Welcome to my corner of the net. I'm a software engineer who builds
+        things for the web and beyond. When I'm not coding, you'll find me
+        exploring new technologies, tinkering with side projects, or chasing
+        the neon glow of a good idea.
+      </p>
+    </div>
+
+    <!-- Links -->
+    <section class="links-section">
+      <h2>// Connect</h2>
+      <div class="links-grid">
+        <a href="https://github.com" class="link-btn" target="_blank" rel="noopener">
+          <span class="icon">&#9000;</span> GitHub
+        </a>
+        <a href="https://twitter.com" class="link-btn" target="_blank" rel="noopener">
+          <span class="icon">&#9733;</span> Twitter / X
+        </a>
+        <a href="https://linkedin.com" class="link-btn" target="_blank" rel="noopener">
+          <span class="icon">&#9830;</span> LinkedIn
+        </a>
+        <a href="mailto:hello@example.com" class="link-btn">
+          <span class="icon">&#9993;</span> Email
+        </a>
+        <a href="https://dev.to" class="link-btn" target="_blank" rel="noopener">
+          <span class="icon">&#9998;</span> Blog
+        </a>
+        <a href="https://youtube.com" class="link-btn" target="_blank" rel="noopener">
+          <span class="icon">&#9654;</span> YouTube
+        </a>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ── Footer ────────────────────────────────── -->
+  <footer>
+    <p>&copy; 2026 Dante &mdash; Made with <span>&hearts;</span> and too much neon</p>
+  </footer>
+
+  <!-- ── Stars Script ──────────────────────────── -->
+  <script>
+    (function () {
+      const canvas = document.getElementById('stars-canvas');
+      const ctx = canvas.getContext('2d');
+      let stars = [];
+      const STAR_COUNT = 180;
+
+      function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+
+      function createStars() {
+        stars = [];
+        for (let i = 0; i < STAR_COUNT; i++) {
+          stars.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            r: Math.random() * 1.5 + 0.3,
+            alpha: Math.random(),
+            delta: (Math.random() * 0.02) + 0.003,
+          });
+        }
+      }
+
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for (const s of stars) {
+          s.alpha += s.delta;
+          if (s.alpha >= 1 || s.alpha <= 0) s.delta *= -1;
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(255, 255, 255, ${Math.abs(s.alpha).toFixed(2)})`;
+          ctx.fill();
+        }
+        requestAnimationFrame(draw);
+      }
+
+      window.addEventListener('resize', () => { resize(); createStars(); });
+      resize();
+      createStars();
+      draw();
+    })();
+  </script>
+
+</body>
+</html>
